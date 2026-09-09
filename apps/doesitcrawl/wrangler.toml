@@ -1,0 +1,64 @@
+name = "bait-402"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+account_id = "<il tuo account Cloudflare>"
+
+# Il sottodominio workers.dev dell'account va creato, perche' senza Cloudflare
+# rifiuta di registrare i cron (errore 10063). Ma il Worker NON va pubblicato su
+# quel sottodominio: sarebbe una terza superficie che serve gli stessi tre
+# marcatori, e un token imparato da li' non sarebbe piu' attribuibile a un host.
+# Dichiarato esplicitamente invece di affidarsi al default, che dipende dalla
+# presenza di routes e puo' cambiare fra versioni di wrangler.
+workers_dev = false
+
+# Il dominio vero attaccato al Worker. Cloudflare crea da se' il record DNS.
+# ATTENZIONE all'ordine: in TOML tutto cio' che segue una intestazione di tabella
+# appartiene a quella tabella. Le chiavi di primo livello (queste) devono stare
+# tutte prima di [[d1_databases]] e di [vars], altrimenti `routes` diventa un
+# campo del database, il dominio non viene collegato e il deploy non protesta.
+routes = [
+  { pattern = "doesitcrawl.com", custom_domain = true }
+]
+
+# Il binding resta DB, non "bait" come suggerisce wrangler: e' il nome con cui
+# worker.js legge il database (env.DB). Il database e' in regione WEUR.
+[[d1_databases]]
+binding = "DB"
+database_name = "bait"
+database_id = "<id del database D1, dato da wrangler>"
+
+# Battito quotidiano alle 05:23 UTC. Scrive una riga in D1 e una su Supabase:
+# rende leggibili i giorni vuoti e tiene sveglio il progetto Supabase gratuito,
+# che altrimenti va in pausa proprio nelle settimane di silenzio.
+[triggers]
+crons = ["23 5 * * *"]
+
+[vars]
+# Il dominio esca, senza barra finale.
+SITE = "https://doesitcrawl.com"
+STARTED = "2026-09-07"
+CONTACT = "https://github.com/stemolti"
+# Il nome nella riga dell'autore, sotto il titolo. La foto accanto viene da
+# src/avatar.js, generato con tools/build-avatar.py.
+AUTHOR = "Stefano Agbodan"
+
+# Chiave IndexNow. NON e' un segreto e va tenuta qui, non nei secret: il
+# protocollo pretende che sia leggibile da chiunque su /<chiave>.txt, ed e'
+# quel file a dimostrare al motore che chi segnala un indirizzo controlla il
+# dominio. Si cambia solo se serve revocare segnalazioni fatte da altri.
+INDEXNOW_KEY = "<una chiave tua, 8-128 caratteri>"
+
+# URL del progetto Supabase, tipo https://xxxx.supabase.co (senza barra finale).
+# La chiave sta come secret: npx wrangler secret put SUPABASE_KEY
+SUPABASE_URL = "https://<ref>.supabase.co"
+
+# I tre marcatori NON stanno piu' qui: sono secret. Cosi' i valori vivi non
+# entrano mai nella cronologia git, e il repo del Worker si puo' pubblicare
+# (giorni 4-7 del dossier) senza uccidere la misura.
+#   npx wrangler secret put TOKEN_ALPHA
+#   npx wrangler secret put TOKEN_BETA
+#   npx wrangler secret put TOKEN_GAMMA
+#
+# ATTENZIONE: se rimetti un TOKEN_* qui dentro, al prossimo deploy il valore del
+# file sovrascrive il secret in silenzio e la misura muore senza dare segnali.
+# I tre valori del commit f7b2627 sono bruciati: erano in chiaro, non usarli.

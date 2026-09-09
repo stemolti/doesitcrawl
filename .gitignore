@@ -1,0 +1,12 @@
+# I valori dei tre marcatori e la chiave del registro. Mai committarli: un motore
+# che imparasse un marcatore da qui invece che dalla pagina ucciderebbe la misura.
+.token
+.dev.vars
+.env
+.env.*
+
+node_modules/
+.wrangler/
+.vercel/
+__pycache__/
+*.pyc

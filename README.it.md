@@ -33,6 +33,63 @@ file lo troverebbe lo stesso, e il test direbbe «renderizza» dove non renderiz
 questo il secondo viaggia XOR-ato con una chiave diversa a ogni richiesta, e non compare
 in nessun byte che il server manda.
 
+## Cosa ha trovato finora
+
+*Aggiornato il 14 settembre 2026. La pagina è online dal 7 settembre.*
+
+Un quarto marcatore, in produzione dal 10 settembre, registra a ogni richiesta se il
+JavaScript è stato davvero eseguito. Separa tre casi che un registro del server non può
+separare: lo script è partito e ha usato una primitiva del browser, è partito e ne ha
+usata un'altra, oppure il crawler ha seguito un indirizzo letterale trovato nel sorgente
+**senza eseguire niente** — e l'ultimo è prova positiva di non-esecuzione, che è la metà
+difficile di questa domanda.
+
+Le categorie qui sotto sono quelle che **Cloudflare verifica**. Uno user-agent da solo
+non prova niente.
+
+| Crawler | Categoria | Richieste | Pagina | Dal marcatore | Verdetto |
+|---|---|---:|---:|---:|---|
+| `meta-externalagent` | AI Crawler | 6 | 3 | 2 | **esegue il JavaScript** |
+| `GoogleOther` | AI Crawler | 4 | 1 | 1 | **legge il sorgente, non esegue** |
+| `Googlebot` | Search Engine Crawler | 57 | 14 | 3 | esegue il JavaScript |
+| `bingbot` | Search Engine Crawler | 34 | 12 | 7 | solo la pagina, mai lo script |
+| `ClaudeBot` | AI Crawler | 115 | 2 | **0** | mai messo alla prova |
+| `GPTBot` | AI Crawler | 14 | 2 | **0** | mai messo alla prova |
+| `Applebot` | AI Search | 8 | 3 | **0** | mai messo alla prova |
+| `OAI-SearchBot` | Search Engine Crawler | 11 | 0 | **0** | mai messo alla prova |
+
+| Scoperta | Prova |
+|---|---|
+| Un crawler AI verificato **renderizza** | 14 set, 07:41 UTC: `meta-externalagent` prende pagina, script e tutte e due le primitive in 628 ms. Non ogni volta — il 12 aveva preso solo la pagina. Una resa su due occasioni. |
+| Un crawler AI verificato **dimostrabilmente no** | 11 set: `GoogleOther`, verificato dalla rete di Google, chiede l'indirizzo letterale com'è scritto nel sorgente invece della forma che lo script costruisce a runtime. Possibile solo leggendo senza eseguire. |
+| **Non tornano** | Il marcatore è partito *dopo* che i crawler AI avevano già smesso di prendere la pagina: quattro di loro non sono mai stati messi alla prova. «Mai messo alla prova» non è «non renderizza». |
+
+| Crawler | Le sue richieste sono soprattutto | La pagina |
+|---|---|---|
+| `ClaudeBot` | `robots.txt` ×55, `sitemap.xml` ×54 | due volte, entrambe il 7 set |
+| `GPTBot` | `sitemap.xml` ×6 | due volte, 7 e 9 set |
+| `Applebot` | lo script ×3 | tre volte, tutte entro l'8 set |
+| `OAI-SearchBot` | `robots.txt` ×6 | mai |
+
+Per un dominio nuovo senza autorità questo può valere più della domanda sul rendering: un
+risultato vuoto alla fine andrà letto come *hanno smesso di passare*, non come *non
+renderizzano*.
+
+### Un avvertimento sulle statistiche per user-agent
+
+| Nome dichiarato | Verificato | Cosa ha chiesto davvero |
+|---|---|---|
+| `ChatGPT-User`, `PerplexityBot`, `OAI-SearchBot` | **no** | `/.env.production`, `/.git/HEAD`, `/service_account.json`, `/.netrc`, `/aws-exports.js` |
+
+È una scansione in cerca di credenziali che indossa quei nomi. Qualunque misura del
+traffico dei crawler AI costruita sui soli user-agent sta contando anche questo.
+
+### Cosa questo non dice
+
+Una pagina, un dominio nuovo senza autorità, poche settimane. Dice cosa hanno fatto questi
+crawler qui, non cosa fanno ovunque. Un beacon assente non prova mai la non-esecuzione:
+solo il caso dell'indirizzo letterale la prova in positivo.
+
 ## Cosa c'è qui dentro
 
 | Cartella | Cosa fa |
@@ -68,8 +125,16 @@ lanciato prima di ogni distribuzione.
 
 I valori dei tre marcatori sono segreti e stanno nei secret della piattaforma, mai nei
 file. **Se un motore imparasse un marcatore da un'altra pagina invece che da questa, la
-misura morirebbe senza dare segnali.** Per la stessa ragione non sono pubblici né il
-contenuto del registro delle visite né le misure raccolte.
+misura morirebbe senza dare segnali.**
+
+Non è pubblico nemmeno il registro delle visite: contiene indirizzi IP, e sono gli
+indirizzi a trasformare la dichiarazione di uno user-agent in un crawler verificato,
+quindi contano e non sta a me pubblicarli.
+
+**I risultati sì.** Fino al 14 settembre 2026 questa sezione diceva che non erano
+pubbliche nemmeno le misure. È stato cambiato di proposito, non per distrazione: quello
+che sta qui sopra non contiene nessun marcatore, nessun indirizzo e nessun registro. Un
+test la cui risposta resta privata non è un test pubblico.
 
 Nel codice restano solo i nomi delle variabili. Gli identificatori dell'account sono
 sostituiti da segnaposto: chi volesse rifare l'esperimento deve creare i propri.

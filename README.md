@@ -33,6 +33,62 @@ merely ingested the file would surface it, and the test would report rendering w
 there is none. That is why the second marker travels XOR-encoded with a key that changes
 on every request, and never appears in any byte the server sends.
 
+## What it has found so far
+
+*Updated 14 September 2026. The page has been live since 7 September.*
+
+A fourth marker, live since 10 September, records per request whether the JavaScript
+actually ran. It separates three cases a server log cannot: the script ran and used one
+browser primitive, it ran and used another, or the crawler followed a literal URL found
+in the source **without running anything** — the last being positive proof of
+non-execution, which is the hard half of this question.
+
+Categories below are the ones **Cloudflare verifies**. A user-agent string alone proves
+nothing.
+
+| Crawler | Category | Requests | Page fetches | Since the marker | Verdict |
+|---|---|---:|---:|---:|---|
+| `meta-externalagent` | AI Crawler | 6 | 3 | 2 | **executes JavaScript** |
+| `GoogleOther` | AI Crawler | 4 | 1 | 1 | **reads the source, does not execute** |
+| `Googlebot` | Search Engine Crawler | 57 | 14 | 3 | executes JavaScript |
+| `bingbot` | Search Engine Crawler | 34 | 12 | 7 | page only, never the script |
+| `ClaudeBot` | AI Crawler | 115 | 2 | **0** | never tested |
+| `GPTBot` | AI Crawler | 14 | 2 | **0** | never tested |
+| `Applebot` | AI Search | 8 | 3 | **0** | never tested |
+| `OAI-SearchBot` | Search Engine Crawler | 11 | 0 | **0** | never tested |
+
+| Finding | Evidence |
+|---|---|
+| A verified AI crawler **does** render | 14 Sep, 07:41 UTC: `meta-externalagent` fetched page, script and both execution primitives in 628 ms. Not every time — on 12 Sep it took the page alone. One render in two chances. |
+| A verified AI crawler **demonstrably does not** | 11 Sep: `GoogleOther`, verified from Google's network, requested the literal URL as written in the source instead of the form the script builds at runtime. Only possible by reading without executing. |
+| **They stop coming back** | The marker went live *after* the AI crawlers had already stopped fetching the page, so four of them were never tested at all. "Never tested" is not "does not render". |
+
+| Crawler | Its requests are mostly | The page itself |
+|---|---|---|
+| `ClaudeBot` | `robots.txt` ×55, `sitemap.xml` ×54 | twice, both 7 Sep |
+| `GPTBot` | `sitemap.xml` ×6 | twice, 7 and 9 Sep |
+| `Applebot` | the script ×3 | three times, all by 8 Sep |
+| `OAI-SearchBot` | `robots.txt` ×6 | never |
+
+For a new domain with no authority this may matter more than the rendering question: an
+empty result at the end must be read as *they stopped coming*, not as *they do not
+render*.
+
+### A warning about user-agent statistics
+
+| Claimed name | Verified | What it actually asked for |
+|---|---|---|
+| `ChatGPT-User`, `PerplexityBot`, `OAI-SearchBot` | **no** | `/.env.production`, `/.git/HEAD`, `/service_account.json`, `/.netrc`, `/aws-exports.js` |
+
+A credential scan wearing those names. Any measurement of AI crawler traffic built on
+user-agent strings alone is counting it.
+
+### What this does not say
+
+One page, one new domain with no authority, a few weeks. It reports what these crawlers
+did here, not what they do everywhere. An absent beacon never proves non-execution; only
+the literal-URL case proves it positively.
+
 ## What is in here
 
 | Directory | What it does |
@@ -67,8 +123,16 @@ without anyone noticing. Hence the parity check, which runs before every deploy.
 
 The values of the three markers are secrets. They live in the platform's secret store,
 never in a file. **If a search engine learned a marker from another page instead of from
-this one, the measurement would die without any signal.** For the same reason neither the
-contents of the visit log nor the collected measurements are published.
+this one, the measurement would die without any signal.**
+
+The visit log is not published either: it contains IP addresses, and the addresses are
+what turns a user-agent claim into a verified crawler, so they matter and they are not
+mine to publish.
+
+**The results are.** Until 14 September 2026 this section said the measurements were not
+published either. That was changed deliberately, not overlooked: the findings above
+contain no marker, no address and no log. A test whose answer stays private is not a
+public test.
 
 Only variable names remain in the code. Account identifiers are replaced with
 placeholders: anyone rebuilding the experiment must create their own.

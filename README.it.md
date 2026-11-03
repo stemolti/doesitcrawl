@@ -35,41 +35,55 @@ in nessun byte che il server manda.
 
 ## Cosa ha trovato finora
 
-*Aggiornato il 14 settembre 2026. La pagina è online dal 7 settembre.*
+*Aggiornato il 3 novembre 2026. La pagina è online dal 7 settembre. Le cifre coprono la
+finestra del registro dal 2 ottobre al 3 novembre; le finestre precedenti stanno nel
+registro, non in questo README.*
 
 Un quarto marcatore, in produzione dal 10 settembre, registra a ogni richiesta se il
 JavaScript è stato davvero eseguito. Separa tre casi che un registro del server non può
 separare: lo script è partito e ha usato una primitiva del browser, è partito e ne ha
 usata un'altra, oppure il crawler ha seguito un indirizzo letterale trovato nel sorgente
-**senza eseguire niente** — e l'ultimo è prova positiva di non-esecuzione, che è la metà
+senza eseguire niente. L'ultimo caso è prova positiva di non-esecuzione, la metà
 difficile di questa domanda.
 
-Le categorie qui sotto sono quelle che **Cloudflare verifica**. Uno user-agent da solo
-non prova niente.
+Le categorie qui sotto sono quelle che Cloudflare verifica. Uno user-agent da solo non
+prova niente.
 
-| Crawler | Categoria | Richieste | Pagina | Dal marcatore | Verdetto |
-|---|---|---:|---:|---:|---|
-| `meta-externalagent` | AI Crawler | 6 | 3 | 2 | **esegue il JavaScript** |
-| `GoogleOther` | AI Crawler | 4 | 1 | 1 | **legge il sorgente, non esegue** |
-| `Googlebot` | Search Engine Crawler | 57 | 14 | 3 | esegue il JavaScript |
-| `bingbot` | Search Engine Crawler | 34 | 12 | 7 | solo la pagina, mai lo script |
-| `ClaudeBot` | AI Crawler | 115 | 2 | **0** | mai messo alla prova |
-| `GPTBot` | AI Crawler | 14 | 2 | **0** | mai messo alla prova |
-| `Applebot` | AI Search | 8 | 3 | **0** | mai messo alla prova |
-| `OAI-SearchBot` | Search Engine Crawler | 11 | 0 | **0** | mai messo alla prova |
+| Crawler | Categoria | Richieste | Pagina | Script | Beacon | Cosa dice la finestra |
+|---|---|---:|---:|---:|---|---|
+| ClaudeBot | AI Crawler | 260 | 1 | 0 | 0 | tornato il 23 ottobre dopo 24 giorni; una pagina, nessuno script |
+| GPTBot | AI Crawler | 36 | 2 | 2 | 0 | scarica lo script; nessuna esecuzione osservata |
+| OAI-SearchBot | Search Engine Crawler | 75 | 0 | 0 | 0 | non prende mai la pagina |
+| GoogleOther | AI Crawler | 7 | 1 | 1 | 1 | esegue; altre quattro richieste leggono il sorgente senza eseguirlo |
+| Applebot | AI Search | 4 | 1 | 1 | 1 | esegue |
+| Googlebot | Search Engine Crawler | 92 | 17 | 15 | 17 | esegue |
+| bingbot | Search Engine Crawler | 54 | 12 | 3 | 0 | prende la pagina; nessuna esecuzione osservata |
+| PerplexityBot | compatibile, non verificato da Cloudflare | 8 | 4 | 0 | 0 | prende la pagina su tutte e due le superfici; nessuna esecuzione osservata |
+
+I conteggi sono righe di registro in quella finestra, non visitatori unici. La finestra
+parte dal 2 ottobre perché `/log` restituisce al massimo 10.000 righe.
+
+Cloudflare ha verificato la richiesta di pagina di ClaudeBot; le altre righe di ClaudeBot
+cadono in due intervalli /24 derivati da richieste già verificate, quindi sono compatibili
+e non verificate una per una. PerplexityBot è compatibile per intervallo pubblicato, non
+verificato da Cloudflare.
+
+Il 3 novembre la configurazione Cloudflare della zona mostrava tutti i controlli sui
+crawler AI disattivati e Bot Preference Sync spento. Nessuno dei silenzi in tabella si
+spiega con un blocco di questa zona.
 
 | Scoperta | Prova |
 |---|---|
-| Un crawler AI verificato **renderizza** | 14 set, 07:41 UTC: `meta-externalagent` prende pagina, script e tutte e due le primitive in 628 ms. Non ogni volta — il 12 aveva preso solo la pagina. Una resa su due occasioni. |
-| Un crawler AI verificato **dimostrabilmente no** | 11 set: `GoogleOther`, verificato dalla rete di Google, chiede l'indirizzo letterale com'è scritto nel sorgente invece della forma che lo script costruisce a runtime. Possibile solo leggendo senza eseguire. |
-| **Non tornano** | Il marcatore è partito *dopo* che i crawler AI avevano già smesso di prendere la pagina: quattro di loro non sono mai stati messi alla prova. «Mai messo alla prova» non è «non renderizza». |
+| Un crawler AI verificato renderizza | 14 settembre: `meta-externalagent` prende pagina, script e tutte e due le primitive in 628 ms. 17 ottobre: `GoogleOther` fa la stessa cosa in 18 secondi. |
+| Lo stesso crawler può leggere senza eseguire | `GoogleOther` chiede l'indirizzo letterale com'è scritto nel sorgente il 12 e 13 ottobre e il 3 novembre. Il 17 ottobre esegue lo script. Le due cose sono vere insieme. |
+| Quelli che contano prendono ancora poco la pagina | ClaudeBot torna il 23 ottobre ma prende una pagina sola. GPTBot prende pagina e script due volte, e nessun beacon. OAI-SearchBot non prende mai la pagina. «Mai messo alla prova» non è «non renderizza». |
 
 | Crawler | Le sue richieste sono soprattutto | La pagina |
 |---|---|---|
-| `ClaudeBot` | `robots.txt` ×55, `sitemap.xml` ×54 | due volte, entrambe il 7 set |
-| `GPTBot` | `sitemap.xml` ×6 | due volte, 7 e 9 set |
-| `Applebot` | lo script ×3 | tre volte, tutte entro l'8 set |
-| `OAI-SearchBot` | `robots.txt` ×6 | mai |
+| `ClaudeBot` | `robots.txt` ×130, `sitemap.xml` ×129 | una volta, 23 ottobre |
+| `GPTBot` | `sitemap.xml` ×32 | due volte, 2 e 20 ottobre |
+| `Applebot` | pagina, script e beacon una volta ciascuno | una volta, 6 ottobre |
+| `OAI-SearchBot` | `robots.txt` ×75 | mai |
 
 Per un dominio nuovo senza autorità questo può valere più della domanda sul rendering: un
 risultato vuoto alla fine andrà letto come *hanno smesso di passare*, non come *non
@@ -86,7 +100,7 @@ traffico dei crawler AI costruita sui soli user-agent sta contando anche questo.
 
 ### Cosa questo non dice
 
-Una pagina, un dominio nuovo senza autorità, poche settimane. Dice cosa hanno fatto questi
+Una pagina, un dominio nuovo senza autorità, otto settimane. Dice cosa hanno fatto questi
 crawler qui, non cosa fanno ovunque. Un beacon assente non prova mai la non-esecuzione:
 solo il caso dell'indirizzo letterale la prova in positivo.
 

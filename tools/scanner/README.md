@@ -3,6 +3,13 @@
 Lo strumento della prima misura del cancello del 16 settembre, idea 2 della verifica
 mondiale.
 
+## Stato al 3 novembre 2026
+
+Le due passate sono state fatte: `baseline-pre-15` il 10 settembre e
+`gate-16-september` il 16. La finestra del 15 settembre è chiusa. Questo README resta
+come traccia del metodo e degli strumenti; i risultati stanno nel
+[README principale](../../README.md).
+
 ## La finestra si chiude il 15 settembre
 
 Il report dice «*rifai* la scansione su 500 domini» il 16 settembre. Quel verbo
@@ -66,4 +73,5 @@ Sotto il 2-3% l'idea 2 si chiude il giorno stesso. Vale anche l'altra: se su 20
 domini con Training bloccato nessuno mostra il blocco di Googlebot in Search
 Console, l'idea cade con lo stesso automatismo.
 
-I risultati vanno in measurements.md con la data.
+I risultati vanno nel registro delle misure, con la data e la soglia scritta prima. Il
+registro non è pubblico.

@@ -197,7 +197,7 @@ code{font:.9em var(--mono)}
 .where{font:11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
 .ledger p{margin:0;color:var(--mute);font-size:.95rem}
 .val{display:block;margin-top:.8rem;font:.85rem/1.5 var(--mono);color:var(--ink);background:var(--soft);padding:.55rem .8rem;border-radius:4px;overflow-wrap:anywhere}
-footer{margin:4rem 0 0;padding:1.5rem 0 3rem;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;font:12px/1.7 var(--mono);color:var(--mute)}
+footer{margin:4rem 0 0;padding:1.5rem 0 3rem;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;font:12px/1.7 var(--mono);color:var(--mute)}
 footer b{display:block;color:var(--ink);font-weight:500;text-transform:uppercase;letter-spacing:.06em;font-size:11px;margin-bottom:.3rem}
 @media (max-width:40rem){.hero{padding:3rem 0 2rem}.top{font-size:11px}.top .sub{display:none}.top .right{gap:.5rem}.ledger li{grid-template-columns:2.25rem 1fr;gap:0 .75rem}footer{grid-template-columns:1fr;gap:1rem}}
 </style>
@@ -262,6 +262,7 @@ user-agent string on its own proves nothing.</p>
 <div><b>Started</b>${CFG.started}</div>
 <div><b>Terms</b>Independent, non-commercial, no tracking, no cookies.</div>
 <div><b>Contact</b>${/^https?:\/\//.test(CFG.contact) ? '<a href="' + CFG.contact + '">' + CFG.contact.replace(/^https?:\/\//, '') + '</a>' : CFG.contact}</div>
+<div><b>Results</b><a href="https://github.com/stemolti/doesitcrawl">github.com/stemolti/doesitcrawl</a></div>
 </footer>
 
 </div>

@@ -35,40 +35,54 @@ on every request, and never appears in any byte the server sends.
 
 ## What it has found so far
 
-*Updated 14 September 2026. The page has been live since 7 September.*
+*Updated 3 November 2026. The page has been live since 7 September. The figures below
+cover the log window from 2 October to 3 November; earlier windows are in the log, not
+in this README.*
 
 A fourth marker, live since 10 September, records per request whether the JavaScript
 actually ran. It separates three cases a server log cannot: the script ran and used one
 browser primitive, it ran and used another, or the crawler followed a literal URL found
-in the source **without running anything** — the last being positive proof of
+in the source without running anything. The last case is positive proof of
 non-execution, which is the hard half of this question.
 
-Categories below are the ones **Cloudflare verifies**. A user-agent string alone proves
+The categories below are the ones Cloudflare verifies. A user-agent string alone proves
 nothing.
 
-| Crawler | Category | Requests | Page fetches | Since the marker | Verdict |
-|---|---|---:|---:|---:|---|
-| `meta-externalagent` | AI Crawler | 6 | 3 | 2 | **executes JavaScript** |
-| `GoogleOther` | AI Crawler | 4 | 1 | 1 | **reads the source, does not execute** |
-| `Googlebot` | Search Engine Crawler | 57 | 14 | 3 | executes JavaScript |
-| `bingbot` | Search Engine Crawler | 34 | 12 | 7 | page only, never the script |
-| `ClaudeBot` | AI Crawler | 115 | 2 | **0** | never tested |
-| `GPTBot` | AI Crawler | 14 | 2 | **0** | never tested |
-| `Applebot` | AI Search | 8 | 3 | **0** | never tested |
-| `OAI-SearchBot` | Search Engine Crawler | 11 | 0 | **0** | never tested |
+| Crawler | Category | Requests | Page fetches | Script fetches | Execution beacon | What the window says |
+|---|---|---:|---:|---:|---|---|
+| ClaudeBot | AI Crawler | 260 | 1 | 0 | 0 | returned on 23 October after 24 days; one page, no script |
+| GPTBot | AI Crawler | 36 | 2 | 2 | 0 | downloads the script; no execution observed |
+| OAI-SearchBot | Search Engine Crawler | 75 | 0 | 0 | 0 | never takes the page |
+| GoogleOther | AI Crawler | 7 | 1 | 1 | 1 | executes; four other requests read the source without running it |
+| Applebot | AI Search | 4 | 1 | 1 | 1 | executes |
+| Googlebot | Search Engine Crawler | 92 | 17 | 15 | 17 | executes |
+| bingbot | Search Engine Crawler | 54 | 12 | 3 | 0 | takes the page; no execution observed |
+| PerplexityBot | compatible, not verified by Cloudflare | 8 | 4 | 0 | 0 | takes the page on both surfaces; no execution observed |
+
+The counts are log rows in that window, not unique visitors. The window starts on
+2 October because `/log` returns at most 10,000 rows.
+
+Cloudflare verified the ClaudeBot page request; the other ClaudeBot rows fall inside two
+/24 ranges derived from requests Cloudflare had verified, so they are compatible rather
+than individually verified. PerplexityBot is compatible by published range, not verified
+by Cloudflare.
+
+On 3 November the Cloudflare configuration for the zone showed every AI crawl control
+disabled and Bot Preference Sync off. None of the silences in the table can be explained
+by a block on this zone.
 
 | Finding | Evidence |
 |---|---|
-| A verified AI crawler **does** render | 14 Sep, 07:41 UTC: `meta-externalagent` fetched page, script and both execution primitives in 628 ms. Not every time — on 12 Sep it took the page alone. One render in two chances. |
-| A verified AI crawler **demonstrably does not** | 11 Sep: `GoogleOther`, verified from Google's network, requested the literal URL as written in the source instead of the form the script builds at runtime. Only possible by reading without executing. |
-| **They stop coming back** | The marker went live *after* the AI crawlers had already stopped fetching the page, so four of them were never tested at all. "Never tested" is not "does not render". |
+| A verified AI crawler does render | 14 September: `meta-externalagent` fetched the page, the script and both execution primitives in 628 ms. 17 October: `GoogleOther` did the same in 18 seconds. |
+| The same crawler can read without executing | `GoogleOther` asked for the literal URL as written in the source on 12 and 13 October and on 3 November. It ran the script on 17 October. Both are true. |
+| The crawlers that matter still barely take the page | ClaudeBot returned on 23 October but fetched one page. GPTBot fetched page and script twice, and no beacon. OAI-SearchBot never fetched the page. "Never tested" is not "does not render". |
 
 | Crawler | Its requests are mostly | The page itself |
 |---|---|---|
-| `ClaudeBot` | `robots.txt` ×55, `sitemap.xml` ×54 | twice, both 7 Sep |
-| `GPTBot` | `sitemap.xml` ×6 | twice, 7 and 9 Sep |
-| `Applebot` | the script ×3 | three times, all by 8 Sep |
-| `OAI-SearchBot` | `robots.txt` ×6 | never |
+| `ClaudeBot` | `robots.txt` ×130, `sitemap.xml` ×129 | once, 23 October |
+| `GPTBot` | `sitemap.xml` ×32 | twice, 2 and 20 October |
+| `Applebot` | page, script and beacon once each | once, 6 October |
+| `OAI-SearchBot` | `robots.txt` ×75 | never |
 
 For a new domain with no authority this may matter more than the rendering question: an
 empty result at the end must be read as *they stopped coming*, not as *they do not
@@ -85,7 +99,7 @@ user-agent strings alone is counting it.
 
 ### What this does not say
 
-One page, one new domain with no authority, a few weeks. It reports what these crawlers
+One page, one new domain with no authority, eight weeks. It reports what these crawlers
 did here, not what they do everywhere. An absent beacon never proves non-execution; only
 the literal-URL case proves it positively.
 

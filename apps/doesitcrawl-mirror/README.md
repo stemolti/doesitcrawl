@@ -54,6 +54,13 @@ quelle colonne restano vuote per questa superficie, e la verifica dell'identità
 rifatta a mano sulle fasce IP pubblicate dagli operatori. I log nativi di Vercel sul
 piano Hobby hanno una conservazione troppo breve per appoggiarci una misura.
 
+## Stato al 3 novembre 2026
+
+La copia è accesa dall'8 settembre 2026. Ha il proprio dominio, la verifica in Search
+Console e IndexNow; l'ultimo deploy è del 14 settembre. Scrive su Supabase e sul Worker,
+e il confronto fra le due colonne è possibile: Googlebot passa su entrambe, Perplexity
+compare su entrambe come compatibile per intervallo IP. Il controllo di parità è verde.
+
 ## Accensione
 
 Undici variabili d'ambiente nel progetto Vercel, in Settings → Environment Variables.

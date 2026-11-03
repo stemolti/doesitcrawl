@@ -5,12 +5,11 @@ separate: il canary test dell'idea 3 e il Worker di
 logging dei giorni 4-7 del dossier, che è
 anche il primo dei tre lavori venduti nell'idea 1.
 
-## Perché va acceso oggi
+## Perché è acceso
 
 È l'unica misura del piano il cui orologio parte quando parti tu. La latenza di
 scoperta di un dominio nuovo a zero autorità è di 4-8 settimane, 6-10 per un esito
-leggibile. Acceso il 6 settembre, il risultato arriva fra metà ottobre e metà
-novembre. Ogni giorno di attesa è un giorno spostato in fondo.
+leggibile. Il Worker è acceso dal 7 settembre 2026, e la finestra di lettura è questa.
 
 ## I tre marcatori
 
@@ -31,33 +30,18 @@ post, non in un repo pubblico, non in un messaggio su un forum. Se un motore imp
 un token da un'altra pagina invece che da questa, quella misura è morta e non te ne
 accorgi.
 
-## Accensione
+## Stato al 3 novembre 2026
 
-Il Worker e' stato acceso il 7 settembre 2026 e sta misurando: database D1 `bait`
-creato, schema applicato, dominio collegato, tre token e `LOG_KEY` caricati come
-secret. Questa sezione non e' una procedura da rifare, e rifarla da capo
-ricreerebbe cose che esistono gia'.
+Il Worker è in produzione dal 7 settembre 2026. `/ingest`, il battito quotidiano e il
+cron `23 5 * * *` sono attivi; il registro sta su D1 e la copia indipendente su
+Supabase. Non ci sono stati deploy dal 10 settembre, quindi la versione online è
+quella con il beacon e le due primitive.
 
-Quello che resta da fare sulla versione in produzione, che al 7 settembre e' ancora
-quella della mattina (senza `/ingest`, senza battito, senza cron):
-
-```bash
-cd apps/doesitcrawl
-npx wrangler d1 execute bait --remote --file=migrations/001-add-source.sql
-```
-
-```bash
-npx wrangler secret put SUPABASE_KEY
-```
-
-```bash
-npx wrangler deploy
-```
-
-La migrazione va **prima** del deploy: il codice nuovo scrive anche la colonna
-`source`, e se la colonna non esiste gli inserimenti falliscono in silenzio e le
-visite si perdono. Tutti i comandi vanno lanciati da questa cartella, dove sta
-`wrangler.toml`.
+Il database D1 `bait`, lo schema, il dominio e i secret esistono già. Se ricostruisci
+l'esperimento da zero, la migrazione va eseguita **prima** del deploy: il codice nuovo
+scrive la colonna `source`, e se la colonna non esiste gli inserimenti falliscono in
+silenzio e le visite si perdono. I comandi sono quelli di `wrangler`, dalla cartella
+che contiene `wrangler.toml`.
 
 ## Farsi trovare senza aspettare
 
@@ -89,8 +73,7 @@ identiche a meno dei token, e fra un deploy e l'altro non lo sono. Si modifica s
 il titolo prende il nome da `AUTHOR` in `wrangler.toml` e la foto da `src/avatar.js`,
 che si genera con `python tools/build-avatar.py FOTO`.
 
-Dopo il deploy, i controlli dall'esterno stanno in
-docs/measurements.md: pagina 200, alpha presente, beta
+Dopo il deploy, i controlli dall'esterno sono: pagina 200, alpha presente, beta
 assente da ogni byte servito, gamma solo in `/e.js`, `robots.txt` con `Allow: /`, e
 `/ingest` che risponde 401 senza chiave invece di 404.
 
@@ -120,8 +103,9 @@ contro le fasce IP pubblicate da OpenAI, Anthropic e Perplexity. `signature_agen
 
 L'endpoint `/log` non si registra da sé, così le tue visite non sporcano i dati.
 
-## Dopo, quando i crawler saranno passati
+## Cosa dicono i dati finora
 
-Interroghi i motori sui tre token, uno per volta, e annoti chi restituisce cosa in
-measurements.md. La soglia era scritta prima di partire: se i crawler AI
-eseguono il JavaScript, l'idea 3 si chiude e il rendering esce dall'idea 1.
+La soglia era scritta prima di partire: se i crawler AI eseguono il JavaScript, l'idea 3
+si chiude e il rendering esce dall'idea 1. È successo due volte, con
+`meta-externalagent` il 14 settembre e con `GoogleOther` il 17 ottobre. I risultati
+aggiornati stanno nel [README principale](../../README.md).
